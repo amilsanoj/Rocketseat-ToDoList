@@ -22,8 +22,11 @@ public class FilterTaskAuth extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        //Validação de rota
         String servletPath = request.getServletPath();
-        if (servletPath.equals("/tasks/")) {
+        if (servletPath.startsWith("/tasks/")) {
+
+
             //Autenticação
             String authEncoded = request.getHeader("Authorization").substring("Basic".length()).trim();
 
