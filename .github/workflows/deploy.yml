@@ -1,0 +1,37 @@
+name: CI/CD AKS Java
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login no Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Docker login no ACR
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login projetoacr.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      - name: Build e Push da imagem
+        run: |
+          docker build -t projetoacr.azurecr.io/todolist-java:${{ github.sha }} .
+          docker push projetoacr.azurecr.io/todolist-java:${{ github.sha }}
+
+      - name: Setar contexto do AKS
+        uses: azure/aks-set-context@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          cluster-name: projetoAKS
+          resource-group: projetoGrupo
+
+      - name: Atualizar imagem no AKS
+        run: |
+          kubectl set image deployment/todolist-java todolist-java=projetoacr.azurecr.io/todolist-java:${{ github.sha }}

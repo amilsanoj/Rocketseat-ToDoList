@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todolist-java
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todolist-java
+  template:
+    metadata:
+      labels:
+        app: todolist-java
+    spec:
+      containers:
+        - name: todolist-java
+          image: projetoacr.azurecr.io/todolist-java:v1
+          ports:
+            - containerPort: 8080
