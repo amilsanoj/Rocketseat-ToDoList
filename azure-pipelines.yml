@@ -1,0 +1,39 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  javaVersion: '17'
+  appName: 'Todoist' # substitua pelo nome real
+  jarPath: '**/target/*.jar'
+
+steps:
+
+  # Checkout do código
+  - task: Checkout@1
+
+  # Instala o JDK
+  - task: UseJavaVersion@1
+    inputs:
+      versionSpec: '$(javaVersion)'
+      jdkArchitecture: 'x64'
+
+  # Build com Maven
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml'
+      goals: 'clean package'
+      options: '-DskipTests'
+      publishJUnitResults: false
+
+  # Deploy para Azure App Service
+  - task: AzureWebApp@1
+    inputs:
+      azureSubscription: 'Azure subscription 1' # nome do serviço de conexão no DevOps
+      appType: 'webApp'
+      appName: '$(appName)'
+      package: '$(System.DefaultWorkingDirectory)/$(jarPath)'
