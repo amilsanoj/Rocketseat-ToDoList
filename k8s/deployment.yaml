@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todolist-api
+  namespace: todolist
+  labels:
+    app: todolist-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: todolist-api
+  template:
+    metadata:
+      labels:
+        app: todolist-api
+    spec:
+      containers:
+        - name: todolist-api
+          image: SEU_ACR_NAME.azurecr.io/todolist-api:v1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
